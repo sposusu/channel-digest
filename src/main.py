@@ -142,13 +142,10 @@ def cmd_run(args):
                 # Get transcript
                 print(f"    Fetching transcript...")
                 transcript = get_transcript(video["video_id"])
-                if not transcript:
-                    print(f"    Skipping (no transcript)")
-                    continue
 
-                # Summarize
+                # Summarize (will fallback to video URL if no transcript and using Gemini)
                 print(f"    Summarizing with {ai_provider}...")
-                summary = summarize(transcript, video["title"], ai_provider)
+                summary = summarize(transcript, video["title"], ai_provider, video["video_id"])
                 if not summary:
                     print(f"    Skipping (summarization failed)")
                     continue

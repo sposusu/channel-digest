@@ -6,7 +6,7 @@ import os
 from typing import Dict, Optional
 
 
-SUMMARY_PROMPT = """Summarize this YouTube video transcript. This summary will replace watching the video, so preserve the storyline and narrative flow.
+SUMMARY_PROMPT_BASE = """Summarize this YouTube video. This summary will replace watching the video, so preserve the storyline and narrative flow.
 
 Provide:
 
@@ -21,10 +21,17 @@ Provide:
 
 4. **Notable Moments** (memorable quotes, funny moments, or highlights worth knowing)
 
-Keep the summary engaging and capture the video's tone/style. The reader should feel like they watched it.
+Keep the summary engaging and capture the video's tone/style. The reader should feel like they watched it."""
+
+SUMMARY_PROMPT = SUMMARY_PROMPT_BASE + """
 
 TRANSCRIPT:
 {transcript}
+"""
+
+VIDEO_URL_PROMPT = SUMMARY_PROMPT_BASE + """
+
+VIDEO URL: {video_url}
 """
 
 SHORTS_PROMPT = """This is a YouTube Shorts transcript (short video < 60 seconds).
@@ -82,6 +89,34 @@ def summarize_with_gemini(transcript: str, video_title: str) -> Optional[Dict]:
         return None
     except Exception as e:
         print(f"  Error running Gemini: {e}")
+        return None
+
+
+def summarize_video_url_with_gemini(video_id: str, video_title: str) -> Optional[Dict]:
+    """Summarize video directly via YouTube URL using Gemini (fallback when no transcript)."""
+    video_url = f"https://youtube.com/watch?v={video_id}"
+    prompt = VIDEO_URL_PROMPT.format(video_url=video_url)
+
+    try:
+        result = subprocess.run(
+            ["gemini", "-m", "gemini-2.5-pro", "-o", "text"],
+            input=prompt,
+            capture_output=True,
+            text=True,
+            timeout=300  # Longer timeout for video processing
+        )
+
+        if result.returncode != 0:
+            print(f"  Gemini video error: {result.stderr[:200]}")
+            return None
+
+        return parse_summary(result.stdout, video_title)
+
+    except subprocess.TimeoutExpired:
+        print("  Error: Gemini video processing timed out")
+        return None
+    except Exception as e:
+        print(f"  Error running Gemini on video: {e}")
         return None
 
 
@@ -148,19 +183,24 @@ def parse_summary(raw_output: str, video_title: str) -> dict:
     }
 
 
-def summarize(transcript: str, video_title: str, provider: str = "gemini") -> Optional[Dict]:
+def summarize(transcript: str, video_title: str, provider: str = "gemini", video_id: str = None) -> Optional[Dict]:
     """
     Summarize transcript using specified AI provider.
 
     Args:
-        transcript: Video transcript text
+        transcript: Video transcript text (can be None if video_id provided)
         video_title: Title of the video
         provider: 'gemini' or 'claude'
+        video_id: YouTube video ID (for fallback when no transcript)
 
     Returns:
         Dict with 'short_summary' and 'full_summary', or None on error
     """
+    # If no transcript but have video_id, try Gemini video URL fallback
     if not transcript:
+        if video_id and provider == "gemini":
+            print(f"    No transcript, trying Gemini with video URL...")
+            return summarize_video_url_with_gemini(video_id, video_title)
         return None
 
     if provider == "gemini":
