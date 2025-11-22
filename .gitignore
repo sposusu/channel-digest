@@ -1,0 +1,15 @@
+# Config with API keys
+config.yaml
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Data (optional - remove if you want to track)
+# data.json
+
+# OS
+.DS_Store

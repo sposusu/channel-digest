@@ -1,0 +1,21 @@
+# Copy this to config.yaml and fill in your values
+
+# Get your API key from: https://console.cloud.google.com/apis/credentials
+youtube_api_key: YOUR_API_KEY_HERE
+
+# AI provider: 'gemini' or 'claude'
+# - Gemini CLI: https://github.com/google-gemini/gemini-cli
+# - Claude Code: https://docs.anthropic.com/en/docs/claude-code
+ai_provider: gemini
+
+max_videos_per_channel: 5
+github_repo: ''
+
+channels:
+  # Add channels via CLI (requires yt-dlp: https://github.com/yt-dlp/yt-dlp):
+  #   python3 -m src.main add https://www.youtube.com/@ChannelName
+  #   python3 -m src.main import channels.txt
+  #   python3 -m src.main import-subscriptions subscriptions.csv  # YouTube Takeout
+  #
+  # Or add channel IDs directly:
+  # - UCeqc9aYVAZcRQq9Ey0x26AQ
