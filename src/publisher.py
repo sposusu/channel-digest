@@ -307,15 +307,26 @@ def generate_summary_viewer(output_path: str):
 
 
 def git_push(repo_path: str, message: str = "Update digest"):
-    """Commit and push changes to GitHub."""
+    """Commit docs to gh-pages branch and push to GitHub."""
     try:
-        subprocess.run(["git", "add", "."], cwd=repo_path, check=True)
+        # Switch to gh-pages branch
+        subprocess.run(["git", "checkout", "gh-pages"], cwd=repo_path, check=True)
+
+        # Get latest docs from main
+        subprocess.run(["git", "checkout", "main", "--", "docs/"], cwd=repo_path, check=True)
+
+        # Commit and push
+        subprocess.run(["git", "add", "docs/"], cwd=repo_path, check=True)
         subprocess.run(
             ["git", "commit", "-m", message],
             cwd=repo_path,
             check=True
         )
         subprocess.run(["git", "push"], cwd=repo_path, check=True)
-        print("Successfully pushed to GitHub!")
+        print("Successfully pushed to gh-pages!")
+
     except subprocess.CalledProcessError as e:
         print(f"Git error: {e}")
+    finally:
+        # Always return to main branch
+        subprocess.run(["git", "checkout", "main"], cwd=repo_path)
