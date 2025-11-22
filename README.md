@@ -2,6 +2,8 @@
 
 AI-powered YouTube channel summaries. Follow channels, get daily digests without watching videos.
 
+**Demo:** https://sposusu.github.io/channel-digest
+
 ## Features
 
 - Fetch latest videos from YouTube channels
