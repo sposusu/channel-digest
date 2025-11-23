@@ -8,6 +8,6 @@
 
 Here's a brief summary:
 
-1.  **What happens**: A gamer imagines their final video being an anticlimactic loss, then gets distracted by a character in their game walking through a solid object.
-2.  **The point**: The humor is in the self-deprecating retirement plan, which is immediately undercut by a random, funny in-game glitch.
-3.  **Vibe**: Funny, casual, and stream-of-consciousness.
+1.  **What happens**: A gamer imagines their last video being an anticlimactic loss, but gets distracted when a character in their game glitches and walks through a solid object.
+2.  **The point**: The humor lies in the mundane retirement plan being interrupted by a casual, weird game bug.
+3.  **Vibe**: Funny and random.
