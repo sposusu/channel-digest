@@ -87,15 +87,29 @@ def summarize_with_gemini(transcript: str, video_title: str) -> Optional[Dict]:
         return None
 
 
-def download_audio_with_ytdlp(video_id: str) -> Optional[str]:
+def download_audio_with_ytdlp(video_id: str, max_duration: int = 3600) -> Optional[str]:
     """Download audio from YouTube video using yt-dlp. Returns path to audio file."""
     video_url = f"https://youtube.com/watch?v={video_id}"
     output_path = f"/tmp/yt_audio_{video_id}.%(ext)s"
 
     try:
-        # Download audio only - use format that doesn't require ffmpeg conversion
+        # Check duration first to skip very long videos
+        duration_result = subprocess.run(
+            ["yt-dlp", "--print", "duration", video_url],
+            capture_output=True, text=True, timeout=30
+        )
+        if duration_result.returncode == 0:
+            try:
+                duration = int(duration_result.stdout.strip())
+                if duration > max_duration:
+                    print(f"    Skipping: video too long ({duration//60} min > {max_duration//60} min limit)")
+                    return None
+            except ValueError:
+                pass  # Can't parse duration, continue anyway
+
+        # Download video (not -x audio) to avoid 403 errors - same as sign_youtube
         result = subprocess.run(
-            ["yt-dlp", "-x", "-o", output_path, video_url],
+            ["yt-dlp", "--format", "best[height<=720]", "-o", output_path, video_url],
             capture_output=True,
             text=True,
             timeout=600  # Longer timeout for large files
