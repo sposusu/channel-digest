@@ -102,14 +102,15 @@ def download_audio_with_ytdlp(video_id: str) -> Optional[str]:
         )
 
         # Check if file exists (returncode may be non-zero due to warnings)
-        for ext in ['mp3', 'm4a', 'webm', 'opus', 'mp4']:
-            audio_path = f"/tmp/yt_audio_{video_id}.{ext}"
-            if os.path.exists(audio_path):
-                return audio_path
+        import glob
+        matches = glob.glob(f"/tmp/yt_audio_{video_id}.*")
+        if matches:
+            return matches[0]
 
-        # If no file found, log the error
-        if result.returncode != 0:
-            print(f"    yt-dlp failed: {result.stderr[:300]}")
+        # If no file found, log the actual error (skip warnings)
+        stderr_lines = [l for l in result.stderr.split('\n') if 'ERROR' in l]
+        if stderr_lines:
+            print(f"    yt-dlp error: {stderr_lines[0][:200]}")
 
         return None
 
@@ -124,20 +125,25 @@ def download_audio_with_ytdlp(video_id: str) -> Optional[str]:
 def transcribe_with_whisper(audio_path: str) -> Optional[str]:
     """Transcribe audio file using Whisper CLI. Returns transcript text."""
     try:
-        # Add imageio_ffmpeg binary to PATH (bundled ffmpeg)
-        ffmpeg_paths = [
-            "/opt/homebrew/lib/python3.13/site-packages/imageio_ffmpeg/binaries",
-            "/opt/homebrew/lib/python3.11/site-packages/imageio_ffmpeg/binaries",
-        ]
-        env = os.environ.copy()
-        for p in ffmpeg_paths:
-            if os.path.exists(p):
-                env["PATH"] = p + ":" + env.get("PATH", "")
-                break
+        # Find imageio_ffmpeg binary and create symlink if needed
+        ffmpeg_dir = "/opt/homebrew/lib/python3.13/site-packages/imageio_ffmpeg/binaries"
+        ffmpeg_binary = os.path.join(ffmpeg_dir, "ffmpeg-macos-aarch64-v7.1")
+        ffmpeg_link = os.path.join(ffmpeg_dir, "ffmpeg")
 
-        # Use whisper CLI to transcribe
+        # Create symlink to ffmpeg if it doesn't exist
+        if os.path.exists(ffmpeg_binary) and not os.path.exists(ffmpeg_link):
+            try:
+                os.symlink(ffmpeg_binary, ffmpeg_link)
+            except:
+                pass  # May fail if no permissions
+
+        env = os.environ.copy()
+        if os.path.exists(ffmpeg_dir):
+            env["PATH"] = ffmpeg_dir + ":" + env.get("PATH", "")
+
+        # Use whisper CLI to transcribe (no --language flag = auto-detect)
         result = subprocess.run(
-            ["whisper", audio_path, "--language", "auto", "--model", "base",
+            ["whisper", audio_path, "--model", "base",
              "--output_format", "txt", "--output_dir", "/tmp"],
             capture_output=True,
             text=True,
