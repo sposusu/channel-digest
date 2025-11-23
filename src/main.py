@@ -115,8 +115,12 @@ def cmd_run(args):
     existing_ids = {v["video_id"] for v in data["videos"]}
     ai_provider = config.get("ai_provider", "gemini")
     max_videos = config.get("max_videos_per_channel", 5)
+    summary_languages = config.get("summary_languages", [])
+    bilingual = len(summary_languages) > 1
 
     print(f"Using AI provider: {ai_provider}")
+    if bilingual:
+        print(f"Bilingual mode: {', '.join(summary_languages)}")
     print(f"Checking {len(config['channels'])} channels...")
 
     new_videos = []
@@ -145,7 +149,7 @@ def cmd_run(args):
 
                 # Summarize (will fallback to video URL if no transcript and using Gemini)
                 print(f"    Summarizing with {ai_provider}...")
-                summary = summarize(transcript, video["title"], ai_provider, video["video_id"])
+                summary = summarize(transcript, video["title"], ai_provider, video["video_id"], bilingual=bilingual)
                 if not summary:
                     print(f"    Skipping (summarization failed)")
                     continue

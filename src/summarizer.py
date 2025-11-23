@@ -23,7 +23,58 @@ Provide:
 
 Keep the summary engaging and capture the video's tone/style. The reader should feel like they watched it."""
 
+# Bilingual prompt template - generates full summary in each language sequentially
+BILINGUAL_SUMMARY_PROMPT_BASE = """Summarize this YouTube video. This summary will replace watching the video, so preserve the storyline and narrative flow.
+
+Provide the summary in TWO languages, SEQUENTIALLY (full zh-TW first, then full English, separated by ---).
+
+FORMAT:
+
+# [Video Title in Chinese]
+
+## 重點摘要
+(2-3 sentences max - the core message/outcome)
+
+## 故事大綱
+(summarize what happens in order, like a condensed version of watching the video)
+- 開場：影片如何開始，介紹了什麼
+- 中段：主要發展、核心內容、轉折點
+- 結尾：如何收尾、最終結果或重點
+
+## 關鍵見解
+(3-5 most valuable points or lessons)
+
+## 精彩時刻
+(memorable quotes, funny moments, or highlights worth knowing)
+
+---
+
+# [Video Title in English]
+
+## TL;DR
+(2-3 sentences max - the core message/outcome)
+
+## Story Flow
+(summarize what happens in order)
+- Beginning: How the video starts, what's introduced
+- Middle: Key developments, main content, turning points
+- End: How it concludes, final results or takeaways
+
+## Key Insights
+(3-5 most valuable points or lessons)
+
+## Notable Moments
+(memorable quotes, funny moments, or highlights worth knowing)
+
+Keep the summary engaging and capture the video's tone/style. The reader should feel like they watched it."""
+
 SUMMARY_PROMPT = SUMMARY_PROMPT_BASE + """
+
+TRANSCRIPT:
+{transcript}
+"""
+
+BILINGUAL_SUMMARY_PROMPT = BILINGUAL_SUMMARY_PROMPT_BASE + """
 
 TRANSCRIPT:
 {transcript}
@@ -52,11 +103,13 @@ def is_shorts(transcript: str) -> bool:
     return len(transcript) < SHORTS_TRANSCRIPT_THRESHOLD
 
 
-def summarize_with_gemini(transcript: str, video_title: str) -> Optional[Dict]:
+def summarize_with_gemini(transcript: str, video_title: str, bilingual: bool = False) -> Optional[Dict]:
     """Summarize transcript using Gemini CLI."""
     # Use shorter prompt for Shorts
     if is_shorts(transcript):
         prompt = SHORTS_PROMPT.format(transcript=transcript)
+    elif bilingual:
+        prompt = BILINGUAL_SUMMARY_PROMPT.format(transcript=transcript[:50000])
     else:
         prompt = SUMMARY_PROMPT.format(transcript=transcript[:50000])
 
@@ -214,11 +267,13 @@ def transcribe_video_fallback(video_id: str) -> Optional[str]:
     return transcript
 
 
-def summarize_with_claude(transcript: str, video_title: str) -> Optional[Dict]:
+def summarize_with_claude(transcript: str, video_title: str, bilingual: bool = False) -> Optional[Dict]:
     """Summarize transcript using Claude CLI."""
     # Use shorter prompt for Shorts
     if is_shorts(transcript):
         prompt = SHORTS_PROMPT.format(transcript=transcript)
+    elif bilingual:
+        prompt = BILINGUAL_SUMMARY_PROMPT.format(transcript=transcript[:50000])
     else:
         prompt = SUMMARY_PROMPT.format(transcript=transcript[:50000])
 
@@ -277,7 +332,7 @@ def parse_summary(raw_output: str, video_title: str) -> dict:
     }
 
 
-def summarize(transcript: str, video_title: str, provider: str = "gemini", video_id: str = None) -> Optional[Dict]:
+def summarize(transcript: str, video_title: str, provider: str = "gemini", video_id: str = None, bilingual: bool = False) -> Optional[Dict]:
     """
     Summarize transcript using specified AI provider.
 
@@ -286,6 +341,7 @@ def summarize(transcript: str, video_title: str, provider: str = "gemini", video
         video_title: Title of the video
         provider: 'gemini' or 'claude'
         video_id: YouTube video ID (for fallback when no transcript)
+        bilingual: If True, generate summary in multiple languages (zh-TW + en)
 
     Returns:
         Dict with 'short_summary' and 'full_summary', or None on error
@@ -303,9 +359,9 @@ def summarize(transcript: str, video_title: str, provider: str = "gemini", video
         return None
 
     if provider == "gemini":
-        return summarize_with_gemini(transcript, video_title)
+        return summarize_with_gemini(transcript, video_title, bilingual=bilingual)
     elif provider == "claude":
-        return summarize_with_claude(transcript, video_title)
+        return summarize_with_claude(transcript, video_title, bilingual=bilingual)
     else:
         print(f"  Unknown AI provider: {provider}")
         return None
