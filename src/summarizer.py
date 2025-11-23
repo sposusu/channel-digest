@@ -127,7 +127,7 @@ def summarize_with_gemini(transcript: str, video_title: str, bilingual: bool = F
             print(f"  Gemini error: {result.stderr[:200]}")
             return None
 
-        return parse_summary(result.stdout, video_title)
+        return parse_summary(result.stdout, video_title, bilingual=bilingual)
 
     except FileNotFoundError:
         print("  Error: 'gemini' CLI not found. Install it or use 'claude' provider.")
@@ -290,7 +290,7 @@ def summarize_with_claude(transcript: str, video_title: str, bilingual: bool = F
             print(f"  Claude error: {result.stderr}")
             return None
 
-        return parse_summary(result.stdout, video_title)
+        return parse_summary(result.stdout, video_title, bilingual=bilingual)
 
     except FileNotFoundError:
         print("  Error: 'claude' CLI not found. Install Claude Code or use 'gemini' provider.")
@@ -303,28 +303,48 @@ def summarize_with_claude(transcript: str, video_title: str, bilingual: bool = F
         return None
 
 
-def parse_summary(raw_output: str, video_title: str) -> dict:
+def parse_summary(raw_output: str, video_title: str, bilingual: bool = False) -> dict:
     """Parse AI output into structured summary."""
     lines = raw_output.strip().split('\n')
 
-    # Extract TL;DR (first meaningful paragraph after the header)
-    tldr = ""
-    for i, line in enumerate(lines):
-        if "tl;dr" in line.lower() or "tldr" in line.lower():
-            # Get the next non-empty line(s)
-            for j in range(i + 1, min(i + 4, len(lines))):
-                if lines[j].strip() and not lines[j].startswith('#'):
-                    tldr = lines[j].strip().lstrip('- ')
-                    break
-            break
-
-    # If no TL;DR found, use first paragraph
-    if not tldr:
-        for line in lines:
-            stripped = line.strip()
-            if stripped and not stripped.startswith('#') and len(stripped) > 20:
-                tldr = stripped[:200]
+    # For bilingual mode, extract zh-TW summary (重點摘要) as short_summary
+    if bilingual:
+        tldr = ""
+        for i, line in enumerate(lines):
+            if "重點摘要" in line:
+                # Get the next non-empty line(s)
+                for j in range(i + 1, min(i + 6, len(lines))):
+                    if lines[j].strip() and not lines[j].startswith('#') and not lines[j].startswith('##'):
+                        tldr = lines[j].strip().lstrip('- ')
+                        break
                 break
+
+        # Fallback to first meaningful paragraph if 重點摘要 not found
+        if not tldr:
+            for line in lines:
+                stripped = line.strip()
+                if stripped and not stripped.startswith('#') and len(stripped) > 20:
+                    tldr = stripped[:200]
+                    break
+    else:
+        # Extract TL;DR (first meaningful paragraph after the header)
+        tldr = ""
+        for i, line in enumerate(lines):
+            if "tl;dr" in line.lower() or "tldr" in line.lower():
+                # Get the next non-empty line(s)
+                for j in range(i + 1, min(i + 4, len(lines))):
+                    if lines[j].strip() and not lines[j].startswith('#'):
+                        tldr = lines[j].strip().lstrip('- ')
+                        break
+                break
+
+        # If no TL;DR found, use first paragraph
+        if not tldr:
+            for line in lines:
+                stripped = line.strip()
+                if stripped and not stripped.startswith('#') and len(stripped) > 20:
+                    tldr = stripped[:200]
+                    break
 
     return {
         "short_summary": tldr,
