@@ -29,11 +29,6 @@ TRANSCRIPT:
 {transcript}
 """
 
-VIDEO_URL_PROMPT = SUMMARY_PROMPT_BASE + """
-
-VIDEO URL: {video_url}
-"""
-
 SHORTS_PROMPT = """This is a YouTube Shorts transcript (short video < 60 seconds).
 
 Summarize briefly:
@@ -92,32 +87,111 @@ def summarize_with_gemini(transcript: str, video_title: str) -> Optional[Dict]:
         return None
 
 
-def summarize_video_url_with_gemini(video_id: str, video_title: str) -> Optional[Dict]:
-    """Summarize video directly via YouTube URL using Gemini (fallback when no transcript)."""
+def download_audio_with_ytdlp(video_id: str) -> Optional[str]:
+    """Download audio from YouTube video using yt-dlp. Returns path to audio file."""
     video_url = f"https://youtube.com/watch?v={video_id}"
-    prompt = VIDEO_URL_PROMPT.format(video_url=video_url)
+    output_path = f"/tmp/yt_audio_{video_id}.%(ext)s"
 
     try:
+        # Download audio only - use format that doesn't require ffmpeg conversion
         result = subprocess.run(
-            ["gemini", "-m", "gemini-2.5-pro", "-o", "text"],
-            input=prompt,
+            ["yt-dlp", "-x", "-o", output_path, video_url],
             capture_output=True,
             text=True,
-            timeout=300  # Longer timeout for video processing
+            timeout=600  # Longer timeout for large files
+        )
+
+        # Check if file exists (returncode may be non-zero due to warnings)
+        for ext in ['mp3', 'm4a', 'webm', 'opus', 'mp4']:
+            audio_path = f"/tmp/yt_audio_{video_id}.{ext}"
+            if os.path.exists(audio_path):
+                return audio_path
+
+        # If no file found, log the error
+        if result.returncode != 0:
+            print(f"    yt-dlp failed: {result.stderr[:300]}")
+
+        return None
+
+    except subprocess.TimeoutExpired:
+        print("    yt-dlp download timed out")
+        return None
+    except Exception as e:
+        print(f"    yt-dlp error: {e}")
+        return None
+
+
+def transcribe_with_whisper(audio_path: str) -> Optional[str]:
+    """Transcribe audio file using Whisper CLI. Returns transcript text."""
+    try:
+        # Add imageio_ffmpeg binary to PATH (bundled ffmpeg)
+        ffmpeg_paths = [
+            "/opt/homebrew/lib/python3.13/site-packages/imageio_ffmpeg/binaries",
+            "/opt/homebrew/lib/python3.11/site-packages/imageio_ffmpeg/binaries",
+        ]
+        env = os.environ.copy()
+        for p in ffmpeg_paths:
+            if os.path.exists(p):
+                env["PATH"] = p + ":" + env.get("PATH", "")
+                break
+
+        # Use whisper CLI to transcribe
+        result = subprocess.run(
+            ["whisper", audio_path, "--language", "auto", "--model", "base",
+             "--output_format", "txt", "--output_dir", "/tmp"],
+            capture_output=True,
+            text=True,
+            timeout=600,  # 10 min timeout for long videos
+            env=env
         )
 
         if result.returncode != 0:
-            print(f"  Gemini video error: {result.stderr[:200]}")
+            print(f"    Whisper error: {result.stderr[:200]}")
             return None
 
-        return parse_summary(result.stdout, video_title)
+        # Read the transcript file
+        txt_path = audio_path.rsplit('.', 1)[0] + '.txt'
+        if os.path.exists(txt_path):
+            with open(txt_path, 'r') as f:
+                return f.read().strip()
 
+        return None
+
+    except FileNotFoundError:
+        print("    Whisper not installed. Install with: pip install openai-whisper")
+        return None
     except subprocess.TimeoutExpired:
-        print("  Error: Gemini video processing timed out")
+        print("    Whisper transcription timed out")
         return None
     except Exception as e:
-        print(f"  Error running Gemini on video: {e}")
+        print(f"    Whisper error: {e}")
         return None
+
+
+def transcribe_video_fallback(video_id: str) -> Optional[str]:
+    """Download video audio and transcribe with Whisper as fallback."""
+    print(f"    Downloading audio with yt-dlp...")
+    audio_path = download_audio_with_ytdlp(video_id)
+
+    if not audio_path:
+        print(f"    Failed to download audio")
+        return None
+
+    print(f"    Transcribing with Whisper...")
+    transcript = transcribe_with_whisper(audio_path)
+
+    # Cleanup audio file
+    try:
+        os.remove(audio_path)
+        # Also remove whisper output files
+        for ext in ['txt', 'srt', 'vtt', 'json']:
+            cleanup_path = audio_path.rsplit('.', 1)[0] + '.' + ext
+            if os.path.exists(cleanup_path):
+                os.remove(cleanup_path)
+    except:
+        pass
+
+    return transcript
 
 
 def summarize_with_claude(transcript: str, video_title: str) -> Optional[Dict]:
@@ -196,11 +270,16 @@ def summarize(transcript: str, video_title: str, provider: str = "gemini", video
     Returns:
         Dict with 'short_summary' and 'full_summary', or None on error
     """
-    # If no transcript but have video_id, try Gemini video URL fallback
+    # If no transcript but have video_id, try Whisper fallback
+    if not transcript and video_id:
+        print(f"    No transcript available, trying Whisper fallback...")
+        transcript = transcribe_video_fallback(video_id)
+        if not transcript:
+            print(f"    Whisper fallback failed")
+            return None
+        print(f"    Whisper transcription successful ({len(transcript)} chars)")
+
     if not transcript:
-        if video_id and provider == "gemini":
-            print(f"    No transcript, trying Gemini with video URL...")
-            return summarize_video_url_with_gemini(video_id, video_title)
         return None
 
     if provider == "gemini":
