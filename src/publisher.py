@@ -24,6 +24,9 @@ def save_data(data: dict, data_path: str):
 
 def save_summary_markdown(video: dict, summaries_dir: str) -> str:
     """Save full summary as markdown file."""
+    # Ensure directory exists
+    os.makedirs(summaries_dir, exist_ok=True)
+
     date_str = video["published_at"][:10]
     filename = f"{date_str}-{video['video_id']}.md"
     filepath = os.path.join(summaries_dir, filename)
@@ -206,6 +209,9 @@ def generate_index_html(data: dict, output_path: str, channel_names: list = None
 </body>
 </html>
 """
+
+    # Ensure directory exists
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     with open(output_path, 'w') as f:
         f.write(html)
