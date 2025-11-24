@@ -307,23 +307,58 @@ def generate_summary_viewer(output_path: str):
 
 
 def git_push(repo_path: str, message: str = "Update digest"):
-    """Commit docs to gh-pages branch and push to GitHub."""
+    """Commit docs to gh-pages branch and push to GitHub.
+
+    Note: docs/ and data.json are in .gitignore on main, so we copy them
+    directly to gh-pages without committing to main.
+    """
+    import tempfile
+    import shutil
+
     try:
+        # Save uncommitted docs/ to temp location
+        temp_dir = tempfile.mkdtemp()
+        docs_src = os.path.join(repo_path, "docs")
+        docs_temp = os.path.join(temp_dir, "docs")
+
+        if os.path.exists(docs_src):
+            shutil.copytree(docs_src, docs_temp)
+        else:
+            print("Warning: docs/ directory not found")
+            return
+
         # Switch to gh-pages branch
         subprocess.run(["git", "checkout", "gh-pages"], cwd=repo_path, check=True)
 
-        # Get latest docs from main
-        subprocess.run(["git", "checkout", "main", "--", "docs/"], cwd=repo_path, check=True)
+        # Copy docs from temp to gh-pages
+        docs_dest = os.path.join(repo_path, "docs")
+        if os.path.exists(docs_dest):
+            shutil.rmtree(docs_dest)
+        shutil.copytree(docs_temp, docs_dest)
 
         # Commit and push
         subprocess.run(["git", "add", "docs/"], cwd=repo_path, check=True)
-        subprocess.run(
-            ["git", "commit", "-m", message],
+
+        # Check if there are changes to commit
+        result = subprocess.run(
+            ["git", "diff", "--cached", "--quiet"],
             cwd=repo_path,
-            check=True
+            capture_output=True
         )
-        subprocess.run(["git", "push"], cwd=repo_path, check=True)
-        print("Successfully pushed to gh-pages!")
+
+        if result.returncode != 0:  # There are changes
+            subprocess.run(
+                ["git", "commit", "-m", message],
+                cwd=repo_path,
+                check=True
+            )
+            subprocess.run(["git", "push"], cwd=repo_path, check=True)
+            print("Successfully pushed to gh-pages!")
+        else:
+            print("No changes to push to gh-pages")
+
+        # Cleanup temp
+        shutil.rmtree(temp_dir)
 
     except subprocess.CalledProcessError as e:
         print(f"Git error: {e}")

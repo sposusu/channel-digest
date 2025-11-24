@@ -59,9 +59,14 @@ python3 -m src.main list
 2. Settings → Pages → Source: `gh-pages` branch, `/docs` folder
 3. Your digest will be at `https://username.github.io/channel-digest/`
 
+**Branch Strategy:**
+- `main` - Source code only (data.json and docs/ are gitignored)
+- `gh-pages` - Generated content for GitHub Pages
+
 ## How It Works
 
 1. Fetches latest videos via YouTube Data API (free 10k units/day)
 2. Extracts transcripts using `youtube-transcript-api` (free)
 3. Summarizes with local AI CLI (free)
 4. Generates static HTML with video cards and markdown summaries
+5. `run --push` copies generated content to `gh-pages` branch without committing to `main`

@@ -8,8 +8,9 @@ __pycache__/
 .venv/
 venv/
 
-# Data (optional - remove if you want to track)
-# data.json
+# Generated content (only on gh-pages branch)
+data.json
+docs/
 
 # OS
 .DS_Store
