@@ -313,15 +313,34 @@ def generate_summary_viewer(output_path: str):
 
 
 def git_push(repo_path: str, message: str = "Update digest"):
-    """Commit docs to gh-pages branch and push to GitHub.
+    """Commit data.json to main and docs/ to gh-pages, then push both.
 
-    Note: docs/ and data.json are in .gitignore on main, so we copy them
-    directly to gh-pages without committing to main.
+    Note: data.json is tracked on main (metadata), docs/ is gitignored on main
+    but committed to gh-pages (generated HTML/markdown content).
     """
     import tempfile
     import shutil
 
     try:
+        # First, commit and push data.json to main
+        subprocess.run(["git", "add", "data.json"], cwd=repo_path, check=True)
+
+        # Check if there are changes to commit
+        result = subprocess.run(
+            ["git", "diff", "--cached", "--quiet"],
+            cwd=repo_path,
+            capture_output=True
+        )
+
+        if result.returncode != 0:  # There are changes
+            subprocess.run(
+                ["git", "commit", "-m", message],
+                cwd=repo_path,
+                check=True
+            )
+            subprocess.run(["git", "push", "origin", "main"], cwd=repo_path, check=True)
+            print("Pushed data.json to main")
+
         # Save uncommitted docs/ to temp location
         temp_dir = tempfile.mkdtemp()
         docs_src = os.path.join(repo_path, "docs")
@@ -359,7 +378,7 @@ def git_push(repo_path: str, message: str = "Update digest"):
                 check=True
             )
             subprocess.run(["git", "push", "--force"], cwd=repo_path, check=True)
-            print("Successfully pushed to gh-pages!")
+            print("Pushed docs/ to gh-pages")
         else:
             print("No changes to push to gh-pages")
 

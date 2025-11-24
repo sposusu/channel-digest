@@ -9,7 +9,6 @@ __pycache__/
 venv/
 
 # Generated content (only on gh-pages branch)
-data.json
 docs/
 
 # OS

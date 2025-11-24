@@ -60,8 +60,9 @@ python3 -m src.main list
 3. Your digest will be at `https://username.github.io/channel-digest/`
 
 **Branch Strategy:**
-- `main` - Source code only (data.json and docs/ are gitignored)
-- `gh-pages` - Generated content for GitHub Pages
+- `main` - Source code + data.json (metadata tracking which videos are processed)
+- `gh-pages` - Generated HTML/markdown content (docs/)
+- docs/ is gitignored on main to keep it clean
 
 ## How It Works
 
@@ -69,4 +70,4 @@ python3 -m src.main list
 2. Extracts transcripts using `youtube-transcript-api` (free)
 3. Summarizes with local AI CLI (free)
 4. Generates static HTML with video cards and markdown summaries
-5. `run --push` copies generated content to `gh-pages` branch without committing to `main`
+5. `run --push` commits data.json to main and copies docs/ to gh-pages

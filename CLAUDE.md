@@ -47,10 +47,11 @@ max_videos_per_channel: 5
 
 ## Deployment
 
-- `main` branch: source code only (data.json and docs/ are gitignored)
-- `gh-pages` branch: generated content for GitHub Pages
+- `main` branch: source code + data.json (metadata tracking which videos are processed)
+- `gh-pages` branch: generated HTML/markdown content (docs/)
+- docs/ is gitignored on main to keep it clean
 - Use `python3 -m src.main run --push` to deploy
-- The push copies docs/ to gh-pages without committing to main
+- The push commits data.json to main and copies docs/ to gh-pages
 
 ## Important
 
