@@ -6,8 +6,6 @@
 
 ---
 
-Here's a brief summary:
-
-1.  **What happens**: A gamer easily defeats an opponent with a powerful "65 HP gate" and then reflects on how overpowered it must feel to play against them.
-2.  **The point**: The joke is the gamer's sudden realization and empathy for how frustrating it must be to face their powerful strategy.
-3.  **Vibe**: Funny, gaming humor.
+**What happens**: A gamer dismisses an opponent's move as weak, only to be immediately and ironically defeated themselves.
+**The point**: The joke is the instant karma and the player's sudden realization of how it feels to be on the receiving end of a loss.
+**Vibe**: Funny, gaming humor.
