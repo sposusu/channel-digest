@@ -6,48 +6,48 @@
 
 ---
 
-# LangChain教學：用模型呼叫限制中介軟體為你的AI代理加上「護欄」
+# LangChain 中介軟體示範：模型呼叫次數限制
 
 ## 重點摘要
-本影片介紹了LangChain的「模型呼叫限制中介軟體」（Model Call Limit Middleware），這是一個關鍵的保護機制，能防止AI代理（agent）因無限循環或過度自主而濫用API。開發者可以透過設定單次任務或整個對話的呼叫次數上限，有效控制成本並確保系統穩定。
+LangChain 的「模型呼叫次數限制」中介軟體是一個關鍵的防護機制，能防止自主代理 (agent) 進行過多的 API 呼叫。透過為單次互動或整個對話設定上限，開發者可以確保代理高效、可預測地運作，並在達到限制時優雅地將問題升級處理。
 
 ## 故事大綱
-- **開場**：LangChain的Sydney點出AI代理的自主性是一把雙面刃，雖然強大但也有失控風險，可能導致API額度被耗盡。她接著介紹了「模型呼叫限制中介軟體」作為解決方案。
-- **中段**：影片展示了如何設定此中介軟體，區分了兩種限制模式：「單次運行限制」（run limit）針對單一指令的處理過程，以及「對話線程限制」（thread limit）針對整個對話的總呼叫次數。接著，她透過程式碼建立一個客服代理，此代理會將帳務問題轉交給一個設有「單次運行最多2次」呼叫限制的「帳務子代理」。
-- **結尾**：Sydney進行了兩次測試。第一次，一個簡單問題（退款政策），子代理在限制內成功完成。第二次，一個複雜問題（重複收費查詢），子代理嘗試呼叫工具兩次後達到上限，系統成功捕捉到錯誤並觸發「轉接真人客服」流程。這個結果完美展示了此護欄機制的功用。
+- **開場**：LangChain 的 Sydney 介紹了自主代理的潛在風險——它們可能因無限循環呼叫而耗盡 API 額度。她展示了「模型呼叫次數限制」中介軟體，作為控制此問題的簡單解決方案。
+- **中段**：影片透過一個客服場景展示此功能。一個主代理會將帳務問題委派給一個「帳務子代理」。此子代理被設定了「單次執行最多 2 次模型呼叫」的限制。當面對簡單問題（如查詢退款政策）時，子代理能順利在限制內完成任務。然而，當被問及一個需要多次工具呼叫的複雜問題（「我被重複收費，請幫我查帳並搜尋知識庫」）時，它很快就達到了 2 次呼叫的上限。
+- **結尾**：子代理在達到呼叫上限後，如預期地拋出一個錯誤。主代理成功捕捉到這個錯誤，並觸發「轉接真人客服」的工具，完美演示了如何利用此中介軟體建立一個可預測且安全的代理系統。
 
 ## 關鍵見解
-1.  **自主性的風險管理**：AI代理的自主決策能力需要搭配護欄機制，以避免失控行為和無法預期的資源消耗。
-2.  **兩種限制模式**：開發者可以根據需求，精準控制單次互動（run）或整個對話（thread）的API呼叫上限。
-3.  **優雅地處理失敗**：當代理達到呼叫上限時，系統可以設定為拋出錯誤，讓開發者能捕捉此狀況並執行備用方案，例如「轉接真人客服」，而非直接崩潰。
-4.  **實用的監督者架構**：影片中的主代理與子代理設計，展示了一種「監督者模式」，主代理負責分派任務，而子代理在各自的規範下運作，實現了功能模組化與風險隔離。
-5.  **簡易高效的實現**：只需幾行程式碼，就能為AI應用加上一道重要的安全防線，大幅提升系統的穩定性與可預測性。
+1.  **自主性 vs. 控制**：代理的強大在於其自主性，但這也帶來了失控的風險（如無限迴圈或高昂成本），因此防護機制至關重要。
+2.  **兩種限制類型**：此中介軟體可以限制「單次執行」（`run`，即一次使用者訊息的處理過程）或「整個對話」（`thread`）中的模型總呼叫次數。
+3.  **可預測的錯誤處理**：透過將退出行為設定為 `error`，開發者可以捕捉 `ModelCallLimitExceeded` 錯誤並實作自訂邏輯，例如將問題升級給真人客服。
+4.  **監督者架構的應用**：示範中使用了一種監督者模式 (supervisor architecture)，由一個主代理將任務委派給專門的子代理，但始終保留最終控制權。
+5.  **簡易的實作**：只需幾行程式碼即可加入此中介軟體，為你的代理帶來顯著的安全性與成本控制效益。
 
 ## 精彩時刻
-- **核心痛點**：「代理可能會失控，呼叫數百次工具，燒光你的API額度。」
-- **「啊哈！」時刻**：在複雜問題測試中，從追蹤視圖（trace view）可以清楚看到子代理在兩次工具呼叫後，拋出了`ModelCallLimitExceeded`錯誤，並成功觸發了`escalate_to_human`工具，完美驗證了設計。
-- **關鍵概念區分**：清楚解釋了「run limit」（針對單次調用）和「thread limit」（針對整個對話）的差異，幫助開發者選擇正確的限制策略。
+- **核心引言**：「代理之所以如此強大，是因為它們是自主的……但這種自主性也伴隨著風險。」
+- **示範亮點**：當複雜查詢導致子代理失敗，而主代理流暢地將問題升級給真人時的「頓悟時刻」，完美展示了系統按預期運作的過程。
+- **關鍵術語**：「單次執行限制 (Run limit)」針對單次呼叫；「對話線程限制 (Thread limit)」針對整個對話。
 
 ---
 
-# LangChain Demo: Guardrail Your AI Agent with Model Call Limit Middleware
+# LangChain Middleware Demo: Model Call Limit
 
 ## TL;DR
-This video introduces LangChain's Model Call Limit Middleware, a critical guardrail to prevent AI agents from overusing APIs through infinite loops or excessive autonomy. By setting limits on model calls per invocation or across an entire conversation, developers can effectively control costs and ensure system stability.
+LangChain's model call limit middleware acts as a crucial guardrail to prevent autonomous agents from making excessive API calls. By setting limits per interaction or conversation, developers can ensure agents operate efficiently and predictably, gracefully escalating when limits are reached.
 
 ## Story Flow
-- **Beginning**: Sydney from LangChain highlights the double-edged sword of agent autonomy: while powerful, it carries the risk of agents going "off the rails" and burning through API quotas. She introduces the Model Call Limit Middleware as the solution.
-- **Middle**: The video explains how to configure the middleware, distinguishing between a "run limit" (for a single invocation) and a "thread limit" (for an entire conversation). A code demo follows, building a customer service agent that delegates billing questions to a sub-agent configured with a `run_limit` of 2 model calls.
-- **End**: Sydney runs two tests. First, a simple query (refund policy), which the sub-agent handles successfully within the limit. Second, a complex query designed to overwhelm it (duplicate charge investigation), which causes the sub-agent to hit its call limit. The system gracefully catches the error and triggers an escalation to a human, perfectly demonstrating the guardrail in action.
+- **Beginning**: Sydney from LangChain introduces the problem: autonomous agents can go "off the rails" and burn through API quotas. She presents the model call limit middleware as a simple solution to control this.
+- **Middle**: The video demonstrates the feature with a customer service agent that delegates billing questions to a "billing sub-agent." This sub-agent is configured with a limit of two model calls per run. When faced with a simple query (like the refund policy), it succeeds within the limit. However, a complex query designed to overwhelm it ("I was charged twice, check my account and search the knowledge base") quickly hits the two-call maximum.
+- **End**: Upon hitting its call limit, the sub-agent errors out as designed. The main agent successfully catches this error and triggers an "escalate to human" tool, perfectly demonstrating how the middleware creates a predictable and safe agent system.
 
 ## Key Insights
-1.  **Managing Autonomy Risk**: The decision-making power of autonomous agents needs guardrails to prevent uncontrolled behavior and unpredictable resource consumption.
-2.  **Two Types of Limits**: Developers can precisely control API usage by setting limits per single interaction (`run`) or across an entire conversation (`thread`).
-3.  **Graceful Failure & Escalation**: When an agent hits its call limit, the system can be set to raise an error. This allows developers to catch it and implement fallback logic, like escalating to a human, instead of crashing.
-4.  **Practical Supervisor Architecture**: The main agent/sub-agent design showcases a "supervisor" pattern, where a primary agent delegates tasks to specialized agents that operate under their own constraints, enabling modularity and risk isolation.
-5.  **Simple and Effective Implementation**: With just a few lines of code, developers can add a crucial safety feature to their AI applications, significantly improving reliability and predictability.
+1.  **Autonomy vs. Control**: Agents are powerful because they're autonomous, but this creates risks like infinite loops or high costs. Guardrails are essential.
+2.  **Two Limit Types**: The middleware can limit model calls within a single `run` (one user message) or across an entire `thread` (the whole conversation).
+3.  **Predictable Error Handling**: By setting the exit behavior to `error`, you can catch the `ModelCallLimitExceeded` error and implement custom logic, like escalating to a human agent.
+4.  **Supervisor Architecture**: The demo uses a supervisor pattern where a main agent delegates tasks to specialized sub-agents but retains ultimate control.
+5.  **Easy Implementation**: The middleware can be added in just a few lines of code to provide significant safety and cost-control benefits for your agents.
 
 ## Notable Moments
-- **The Core Problem**: "Agents can go off the rails and call hundreds of tools and burn through your API quotas."
-- **The "Aha!" Moment**: In the complex query test, the trace view clearly shows the `ModelCallLimitExceeded` error after two tool calls, followed by the successful invocation of the `escalate_to_human` tool, perfectly validating the design.
-- **Key Concept Distinction**: The clear explanation of the difference between a `run limit` (for a single invocation) and a `thread limit` (for an entire conversation) helps developers choose the right strategy.
+- **Memorable Quote**: "Agents are so powerful because they are autonomous... But that autonomy comes with risk."
+- **Demo Highlight**: The "Aha!" moment when the complex query causes the sub-agent to fail and the main agent smoothly escalates to a human, showing the system working exactly as intended.
+- **Key Terminology**: "Run limit" (for a single invocation) vs. "Thread limit" (for a whole conversation).

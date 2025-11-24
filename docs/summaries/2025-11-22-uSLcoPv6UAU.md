@@ -6,6 +6,6 @@
 
 ---
 
-**What happens**: A gamer dismisses an opponent's move as weak, only to be immediately and ironically defeated themselves.
-**The point**: The joke is the instant karma and the player's sudden realization of how it feels to be on the receiving end of a loss.
+**What happens**: A gamer effortlessly defeats an opponent with a powerful "65 HP gate" and then reflects on the experience from their opponent's perspective.
+**The point**: The joke is the gamer's sudden, slightly shocked realization of how overpowered their own strategy is.
 **Vibe**: Funny, gaming humor.
