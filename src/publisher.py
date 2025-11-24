@@ -352,7 +352,7 @@ def git_push(repo_path: str, message: str = "Update digest"):
                 cwd=repo_path,
                 check=True
             )
-            subprocess.run(["git", "push"], cwd=repo_path, check=True)
+            subprocess.run(["git", "push", "--force"], cwd=repo_path, check=True)
             print("Successfully pushed to gh-pages!")
         else:
             print("No changes to push to gh-pages")
