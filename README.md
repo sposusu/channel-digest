@@ -10,6 +10,7 @@ AI-powered YouTube channel summaries. Follow channels, get daily digests without
 - Extract transcripts automatically
 - Summarize with local AI (Gemini CLI or Claude Code)
 - Generate static site for GitHub Pages
+- **User profiles** - Create personalized digests for different users
 - Import channels from URLs or YouTube Takeout
 
 ## Setup
@@ -36,13 +37,16 @@ cp config.yaml.example config.yaml
 ## Usage
 
 ```bash
-# Add channels
+# Add channels (defaults to 'rohan' profile)
 python3 -m src.main add https://www.youtube.com/@ChannelName
+python3 -m src.main add @ChannelName --profile dad  # Add to specific profile
+
+# Import channels
 python3 -m src.main import channels.txt
 python3 -m src.main import-subscriptions subscriptions.csv  # YouTube Takeout
 
-# Run digest
-python3 -m src.main run          # Fetch, summarize, generate HTML
+# Run digest (processes all profiles)
+python3 -m src.main run          # Fetch, summarize, generate HTML for all profiles
 python3 -m src.main run --push   # Also push to gh-pages
 
 # Preview locally
@@ -52,6 +56,28 @@ python3 -m src.main serve        # Start local server
 # List channels
 python3 -m src.main list
 ```
+
+## User Profiles
+
+Configure multiple profiles in `config.yaml`:
+
+```yaml
+profiles:
+  rohan:
+    name: "Rohan's Tech Digest"
+    channels:
+      - UCeqc9aYVAZcRQq9Ey0x26AQ
+
+  dad:
+    name: "Dad's Favorites"
+    channels:
+      - UC0lbAQVpenvfA2QqzsRtL_g
+```
+
+The digest will generate:
+- `index.html` - Rohan's digest
+- `index-dad.html` - Dad's digest
+- Shared channels are processed once
 
 ## GitHub Pages
 

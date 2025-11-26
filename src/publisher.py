@@ -48,11 +48,16 @@ def save_summary_markdown(video: dict, summaries_dir: str) -> str:
     return filename
 
 
-def generate_index_html(data: dict, output_path: str, channel_names: list = None):
+def generate_index_html(data: dict, output_path: str, channel_names: list = None, profile_channels: set = None, page_title: str = None):
     """Generate index.html for GitHub Pages."""
+    # Filter videos by profile channels if specified
+    videos = data["videos"]
+    if profile_channels:
+        videos = [v for v in videos if v.get("channel_id") in profile_channels]
+
     # Sort videos by published date (newest first)
     videos = sorted(
-        data["videos"],
+        videos,
         key=lambda v: v["published_at"],
         reverse=True
     )
@@ -65,6 +70,9 @@ def generate_index_html(data: dict, output_path: str, channel_names: list = None
         channel_names = sorted([c for c in channel_names if c])
     else:
         channel_names = sorted(channel_names)
+
+    # Use provided page title or default
+    title = page_title if page_title else "YouTube Digest"
 
     video_cards = []
     for v in videos:
@@ -92,7 +100,7 @@ def generate_index_html(data: dict, output_path: str, channel_names: list = None
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Digest</title>
+    <title>{title}</title>
     <style>
         * {{ box-sizing: border-box; }}
         body {{
@@ -197,7 +205,7 @@ def generate_index_html(data: dict, output_path: str, channel_names: list = None
     </style>
 </head>
 <body>
-    <h1>YouTube Digest</h1>
+    <h1>{title}</h1>
     <p class="last-updated">Last updated: {data.get('last_updated', 'Never')[:16].replace('T', ' ')}</p>
 
     <div class="channels">

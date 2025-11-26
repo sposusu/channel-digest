@@ -5,13 +5,14 @@ This is a YouTube channel digest project. Use the built-in CLI commands instead 
 ## CLI Commands
 
 ```bash
-# Add channels (use URL, not channel ID)
+# Add channels (defaults to 'rohan' profile)
 python3 -m src.main add https://www.youtube.com/@ChannelName
+python3 -m src.main add @ChannelName --profile dad  # Add to specific profile
 
 # Import multiple channels
 python3 -m src.main import channels.txt
 
-# Run digest (fetch videos, summarize, generate HTML)
+# Run digest (processes all profiles, generates separate HTML for each)
 python3 -m src.main run
 
 # Run and push to GitHub Pages
@@ -40,8 +41,19 @@ ai_provider: gemini          # or claude
 summary_languages:           # Bilingual summaries
   - zh-TW
   - en
-channels:                    # Channel IDs (auto-added via CLI)
-  - UCxxxxx
+
+# User profiles for personalized digests
+profiles:
+  rohan:
+    name: "Rohan's Tech Digest"
+    channels:
+      - UCeqc9aYVAZcRQq9Ey0x26AQ  # Channel IDs (auto-added via CLI)
+
+  dad:
+    name: "Dad's Favorites"
+    channels:
+      - UC0lbAQVpenvfA2QqzsRtL_g
+
 max_videos_per_channel: 5
 ```
 
@@ -52,6 +64,9 @@ max_videos_per_channel: 5
 - docs/ is gitignored on main to keep it clean
 - Use `python3 -m src.main run --push` to deploy
 - The push commits data.json to main and copies docs/ to gh-pages
+- Generates separate HTML files for each profile:
+  - `index.html` - First profile (rohan)
+  - `index-{profile}.html` - Other profiles (e.g., `index-dad.html`)
 
 ## Important
 

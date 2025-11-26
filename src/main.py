@@ -97,6 +97,26 @@ def load_config() -> dict:
         return yaml.safe_load(f)
 
 
+def get_all_channels_from_profiles(config: dict) -> set:
+    """Get all unique channel IDs from all profiles."""
+    channels = set()
+    profiles = config.get("profiles", {})
+
+    for profile_name, profile_data in profiles.items():
+        profile_channels = profile_data.get("channels", [])
+        channels.update(profile_channels)
+
+    return channels
+
+
+def get_profile_channels(config: dict, profile_name: str) -> list:
+    """Get channels for a specific profile."""
+    profiles = config.get("profiles", {})
+    if profile_name in profiles:
+        return profiles[profile_name].get("channels", [])
+    return []
+
+
 def cmd_run(args):
     """Fetch new videos, summarize, and publish."""
     config = load_config()
@@ -105,7 +125,10 @@ def cmd_run(args):
         print("Error: youtube_api_key not set in config.yaml")
         sys.exit(1)
 
-    if not config.get("channels"):
+    # Get all channels from all profiles
+    all_channels = get_all_channels_from_profiles(config)
+
+    if not all_channels:
         print("No channels configured. Add channels to config.yaml")
         sys.exit(1)
 
@@ -121,7 +144,7 @@ def cmd_run(args):
     print(f"Using AI provider: {ai_provider}")
     if bilingual:
         print(f"Bilingual mode: {', '.join(summary_languages)}")
-    print(f"Checking {len(config['channels'])} channels...")
+    print(f"Checking {len(all_channels)} channels across all profiles...")
 
     new_videos = []
 
@@ -129,7 +152,7 @@ def cmd_run(args):
     if "channels" not in data:
         data["channels"] = {}
 
-    for channel_id in config["channels"]:
+    for channel_id in all_channels:
         print(f"\nChannel: {channel_id}")
         try:
             videos = yt.get_latest_videos(channel_id, max_results=max_videos)
@@ -168,38 +191,58 @@ def cmd_run(args):
     # Always save data (to update channel names even if no new videos)
     save_data(data, str(DATA_PATH))
 
-    # Get channel names for display
-    channel_names = list(data.get("channels", {}).values())
-
     if new_videos:
         # Update data
         data["videos"].extend(new_videos)
         save_data(data, str(DATA_PATH))
 
-        # Generate HTML
-        generate_index_html(data, str(DOCS_DIR / "index.html"), channel_names)
-        generate_summary_viewer(str(DOCS_DIR / "summary.html"))
-
         print(f"\nAdded {len(new_videos)} new video(s)")
 
-        # Push to GitHub if configured
-        if args.push:
-            git_push(str(ROOT_DIR), f"Add {len(new_videos)} video summary(ies)")
-    else:
+    # Generate HTML for each profile
+    profiles = config.get("profiles", {})
+    for profile_name, profile_data in profiles.items():
+        profile_channels = set(profile_data.get("channels", []))
+        profile_title = profile_data.get("name", profile_name)
+
+        # Filter videos by profile channels
+        profile_channel_names = [data["channels"].get(ch, "") for ch in profile_channels if ch in data["channels"]]
+
+        # Generate HTML
+        output_file = "index.html" if profile_name == "rohan" else f"index-{profile_name}.html"
+        generate_index_html(
+            data,
+            str(DOCS_DIR / output_file),
+            profile_channel_names,
+            profile_channels=profile_channels,
+            page_title=profile_title
+        )
+        print(f"Generated {output_file} for {profile_title}")
+
+    generate_summary_viewer(str(DOCS_DIR / "summary.html"))
+
+    # Push to GitHub if configured
+    if new_videos and args.push:
+        git_push(str(ROOT_DIR), f"Add {len(new_videos)} video summary(ies)")
+    elif not new_videos:
         print("\nNo new videos found.")
 
 
-def add_channel_to_config(channel_id: str, channel_name: str, config: dict) -> bool:
-    """Add a channel to config if not already present. Returns True if added."""
-    if "channels" not in config:
-        config["channels"] = []
+def add_channel_to_profile(channel_id: str, channel_name: str, config: dict, profile_name: str) -> bool:
+    """Add a channel to a specific profile. Returns True if added."""
+    if "profiles" not in config:
+        config["profiles"] = {}
 
-    if channel_id in config["channels"]:
-        print(f"  Already exists: {channel_name or channel_id}")
+    if profile_name not in config["profiles"]:
+        config["profiles"][profile_name] = {"name": profile_name.title(), "channels": []}
+
+    profile_channels = config["profiles"][profile_name].get("channels", [])
+
+    if channel_id in profile_channels:
+        print(f"  Already exists in {profile_name} profile: {channel_name or channel_id}")
         return False
 
-    config["channels"].append(channel_id)
-    print(f"  Added: {channel_name or channel_id}")
+    config["profiles"][profile_name]["channels"].append(channel_id)
+    print(f"  Added to {profile_name} profile: {channel_name or channel_id}")
     return True
 
 
@@ -213,6 +256,9 @@ def cmd_add(args):
     """Add a channel by URL, handle, or ID."""
     config = load_config()
 
+    # Default to 'rohan' profile if not specified
+    profile_name = args.profile if hasattr(args, 'profile') and args.profile else "rohan"
+
     print(f"Resolving: {args.channel}")
     result = resolve_channel_id(args.channel)
 
@@ -222,7 +268,7 @@ def cmd_add(args):
 
     channel_id, channel_name = result
 
-    if add_channel_to_config(channel_id, channel_name, config):
+    if add_channel_to_profile(channel_id, channel_name, config, profile_name):
         save_config(config)
 
 
@@ -344,6 +390,7 @@ def main():
     # add command
     add_parser = subparsers.add_parser("add", help="Add a channel by URL, handle, or ID")
     add_parser.add_argument("channel", help="YouTube URL, @handle, or channel ID")
+    add_parser.add_argument("--profile", "-p", default="rohan", help="Profile to add channel to (default: rohan)")
     add_parser.set_defaults(func=cmd_add)
 
     # import command
