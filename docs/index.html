@@ -96,6 +96,45 @@
             margin: 4px;
             color: #333;
         }
+        .profile-nav {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .profile-nav-label {
+            font-size: 0.85em;
+            color: #666;
+            font-weight: 500;
+        }
+        .profile-link {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            text-decoration: none;
+            color: #c00;
+            background: #fff;
+            border: 1px solid #ddd;
+            transition: all 0.2s;
+        }
+        .profile-link:hover {
+            background: #f9f9f9;
+            border-color: #c00;
+        }
+        .profile-link.active {
+            background: #c00;
+            color: white;
+            border-color: #c00;
+            cursor: default;
+        }
         @media (max-width: 600px) {
             .video-card {
                 flex-direction: column;
@@ -109,14 +148,30 @@
 </head>
 <body>
     <h1>Rohan's Tech Digest</h1>
-    <p class="last-updated">Last updated: 2025-11-27 00:46</p>
+    <p class="last-updated">Last updated: 2025-11-27 01:07</p>
 
+    <nav class="profile-nav">
+        <div class="profile-nav-label">Profiles:</div>
+        <span class="profile-link active">Rohan's Tech Digest</span> <a href="index-dad.html" class="profile-link">Dad's Favorites</a>
+    </nav>
     <div class="channels">
         <div class="channels-title">Following 5 channel(s)</div>
         <span class="channel-tag">Hera - Age of Empires 2</span><span class="channel-tag">LangChain</span><span class="channel-tag">台南Josh</span><span class="channel-tag">极客湾Geekerwan</span><span class="channel-tag">游庭皓的財經皓角</span>
     </div>
 
     
+        <article class="video-card">
+            <img src="https://i.ytimg.com/vi/pEuvPKBKY_w/mqdefault.jpg" alt="A Viewer Wanted 13 Armor TEUTONIC KNIGHTS" class="thumbnail">
+            <div class="content">
+                <h2><a href="summary.html?v=2025-11-26-pEuvPKBKY_w">A Viewer Wanted 13 Armor TEUTONIC KNIGHTS</a></h2>
+                <p class="meta">Hera - Age of Empires 2 &bull; 2025-11-26</p>
+                <p class="summary">玩家在《世紀帝國II》一場條頓對土耳其的劣勢對局中，透過前期弓兵偽壓制，暗中發展經濟，最終轉型成幾乎無敵的條頓武士，徹底摧毀了對手的弩兵部隊，贏得勝利。</p>
+                <div class="links">
+                    <a href="summary.html?v=2025-11-26-pEuvPKBKY_w">Full Summary</a>
+                    <a href="https://youtube.com/watch?v=pEuvPKBKY_w" target="_blank">Watch Video</a>
+                </div>
+            </div>
+        </article>
         <article class="video-card">
             <img src="https://i.ytimg.com/vi/tE-mVcRhbus/mqdefault.jpg" alt="2025/11/26(三)谷歌vs.輝達 AI夢醒了?第一隻腳形成 美股能止穩?【早晨財經速解讀】" class="thumbnail">
             <div class="content">

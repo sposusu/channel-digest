@@ -96,6 +96,45 @@
             margin: 4px;
             color: #333;
         }
+        .profile-nav {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .profile-nav-label {
+            font-size: 0.85em;
+            color: #666;
+            font-weight: 500;
+        }
+        .profile-link {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            text-decoration: none;
+            color: #c00;
+            background: #fff;
+            border: 1px solid #ddd;
+            transition: all 0.2s;
+        }
+        .profile-link:hover {
+            background: #f9f9f9;
+            border-color: #c00;
+        }
+        .profile-link.active {
+            background: #c00;
+            color: white;
+            border-color: #c00;
+            cursor: default;
+        }
         @media (max-width: 600px) {
             .video-card {
                 flex-direction: column;
@@ -109,8 +148,12 @@
 </head>
 <body>
     <h1>Dad's Favorites</h1>
-    <p class="last-updated">Last updated: 2025-11-27 00:46</p>
+    <p class="last-updated">Last updated: 2025-11-27 01:07</p>
 
+    <nav class="profile-nav">
+        <div class="profile-nav-label">Profiles:</div>
+        <a href="index.html" class="profile-link">Rohan's Tech Digest</a> <span class="profile-link active">Dad's Favorites</span>
+    </nav>
     <div class="channels">
         <div class="channels-title">Following 1 channel(s)</div>
         <span class="channel-tag">游庭皓的財經皓角</span>
