@@ -214,7 +214,9 @@ def cmd_run(args):
             str(DOCS_DIR / output_file),
             profile_channel_names,
             profile_channels=profile_channels,
-            page_title=profile_title
+            page_title=profile_title,
+            all_profiles=profiles,
+            current_profile=profile_name
         )
         print(f"Generated {output_file} for {profile_title}")
 
@@ -366,7 +368,9 @@ def cmd_preview(args):
             str(DOCS_DIR / output_file),
             profile_channel_names,
             profile_channels=profile_channels,
-            page_title=profile_title
+            page_title=profile_title,
+            all_profiles=profiles,
+            current_profile=profile_name
         )
         print(f"Generated {output_file} for {profile_title}")
 

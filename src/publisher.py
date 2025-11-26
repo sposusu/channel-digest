@@ -48,7 +48,7 @@ def save_summary_markdown(video: dict, summaries_dir: str) -> str:
     return filename
 
 
-def generate_index_html(data: dict, output_path: str, channel_names: list = None, profile_channels: set = None, page_title: str = None):
+def generate_index_html(data: dict, output_path: str, channel_names: list = None, profile_channels: set = None, page_title: str = None, all_profiles: dict = None, current_profile: str = None):
     """Generate index.html for GitHub Pages."""
     # Filter videos by profile channels if specified
     videos = data["videos"]
@@ -73,6 +73,25 @@ def generate_index_html(data: dict, output_path: str, channel_names: list = None
 
     # Use provided page title or default
     title = page_title if page_title else "YouTube Digest"
+
+    # Generate profile navigation links
+    profile_nav = ""
+    if all_profiles and len(all_profiles) > 1:
+        nav_links = []
+        for profile_name, profile_data in all_profiles.items():
+            profile_label = profile_data.get("name", profile_name)
+            profile_url = "index.html" if profile_name == "rohan" else f"index-{profile_name}.html"
+
+            if profile_name == current_profile:
+                nav_links.append(f'<span class="profile-link active">{profile_label}</span>')
+            else:
+                nav_links.append(f'<a href="{profile_url}" class="profile-link">{profile_label}</a>')
+
+        profile_nav = f"""
+    <nav class="profile-nav">
+        <div class="profile-nav-label">Profiles:</div>
+        {' '.join(nav_links)}
+    </nav>"""
 
     video_cards = []
     for v in videos:
@@ -193,6 +212,45 @@ def generate_index_html(data: dict, output_path: str, channel_names: list = None
             margin: 4px;
             color: #333;
         }}
+        .profile-nav {{
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }}
+        .profile-nav-label {{
+            font-size: 0.85em;
+            color: #666;
+            font-weight: 500;
+        }}
+        .profile-link {{
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            text-decoration: none;
+            color: #c00;
+            background: #fff;
+            border: 1px solid #ddd;
+            transition: all 0.2s;
+        }}
+        .profile-link:hover {{
+            background: #f9f9f9;
+            border-color: #c00;
+        }}
+        .profile-link.active {{
+            background: #c00;
+            color: white;
+            border-color: #c00;
+            cursor: default;
+        }}
         @media (max-width: 600px) {{
             .video-card {{
                 flex-direction: column;
@@ -207,7 +265,7 @@ def generate_index_html(data: dict, output_path: str, channel_names: list = None
 <body>
     <h1>{title}</h1>
     <p class="last-updated">Last updated: {data.get('last_updated', 'Never')[:16].replace('T', ' ')}</p>
-
+{profile_nav}
     <div class="channels">
         <div class="channels-title">Following {len(channel_names)} channel(s)</div>
         {''.join(f'<span class="channel-tag">{name}</span>' for name in channel_names) if channel_names else '<span class="channel-tag">No channels yet</span>'}
