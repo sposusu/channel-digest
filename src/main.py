@@ -347,11 +347,30 @@ def cmd_list(args):
 
 def cmd_preview(args):
     """Generate HTML without pushing."""
+    config = load_config()
     data = load_data(str(DATA_PATH))
-    channel_names = list(data.get("channels", {}).values())
-    generate_index_html(data, str(DOCS_DIR / "index.html"), channel_names)
+
+    # Generate HTML for each profile
+    profiles = config.get("profiles", {})
+    for profile_name, profile_data in profiles.items():
+        profile_channels = set(profile_data.get("channels", []))
+        profile_title = profile_data.get("name", profile_name)
+
+        # Filter videos by profile channels
+        profile_channel_names = [data["channels"].get(ch, "") for ch in profile_channels if ch in data["channels"]]
+
+        # Generate HTML
+        output_file = "index.html" if profile_name == "rohan" else f"index-{profile_name}.html"
+        generate_index_html(
+            data,
+            str(DOCS_DIR / output_file),
+            profile_channel_names,
+            profile_channels=profile_channels,
+            page_title=profile_title
+        )
+        print(f"Generated {output_file} for {profile_title}")
+
     generate_summary_viewer(str(DOCS_DIR / "summary.html"))
-    print(f"Generated: {DOCS_DIR / 'index.html'}")
     print(f"Run 'python3 -m src.main serve' to view locally")
 
 
