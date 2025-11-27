@@ -214,7 +214,7 @@ def transcribe_with_whisper(audio_path: str) -> Optional[str]:
              "--output_format", "txt", "--output_dir", "/tmp"],
             capture_output=True,
             text=True,
-            timeout=600,  # 10 min timeout for long videos
+            timeout=1200,  # 20 min timeout for long videos
             env=env
         )
 
