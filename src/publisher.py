@@ -421,11 +421,13 @@ def git_push(repo_path: str, message: str = "Update digest"):
         # Switch to gh-pages branch
         subprocess.run(["git", "checkout", "gh-pages"], cwd=repo_path, check=True)
 
-        # Copy docs from temp to gh-pages
+        # Merge docs from temp into gh-pages (preserve existing summaries)
         docs_dest = os.path.join(repo_path, "docs")
         if os.path.exists(docs_dest):
-            shutil.rmtree(docs_dest)
-        shutil.copytree(docs_temp, docs_dest)
+            # Merge: copy new files over existing, preserving old summaries
+            shutil.copytree(docs_temp, docs_dest, dirs_exist_ok=True)
+        else:
+            shutil.copytree(docs_temp, docs_dest)
 
         # Commit and push
         subprocess.run(["git", "add", "docs/"], cwd=repo_path, check=True)
