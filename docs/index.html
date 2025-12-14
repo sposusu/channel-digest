@@ -135,6 +135,42 @@
             border-color: #c00;
             cursor: default;
         }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin: 24px 0;
+            flex-wrap: wrap;
+        }
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #333;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+        .pagination button:hover:not(:disabled) {
+            background: #f9f9f9;
+            border-color: #c00;
+            color: #c00;
+        }
+        .pagination button.active {
+            background: #c00;
+            color: white;
+            border-color: #c00;
+        }
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .pagination .page-info {
+            color: #666;
+            font-size: 0.9em;
+        }
         @media (max-width: 600px) {
             .video-card {
                 flex-direction: column;
@@ -148,18 +184,32 @@
 </head>
 <body>
     <h1>Rohan's Tech Digest</h1>
-    <p class="last-updated">Last updated: 2025-12-14 22:48</p>
+    <p class="last-updated">Last updated: 2025-12-15 00:16</p>
 
     <nav class="profile-nav">
         <div class="profile-nav-label">Profiles:</div>
-        <span class="profile-link active">Rohan's Tech Digest</span> <a href="index-dad.html" class="profile-link">Dad's Favorites</a>
+        <a href="index-dad.html" class="profile-link">Dad's Favorites</a> <span class="profile-link active">Rohan's Tech Digest</span>
     </nav>
     <div class="channels">
-        <div class="channels-title">Following 5 channel(s)</div>
-        <span class="channel-tag">Hera - Age of Empires 2</span><span class="channel-tag">LangChain</span><span class="channel-tag">台南Josh</span><span class="channel-tag">极客湾Geekerwan</span><span class="channel-tag">游庭皓的財經皓角</span>
+        <div class="channels-title">Following 6 channel(s)</div>
+        <span class="channel-tag">Hera - Age of Empires 2</span><span class="channel-tag">LangChain</span><span class="channel-tag">Linus Tech Tips</span><span class="channel-tag">台南Josh</span><span class="channel-tag">极客湾Geekerwan</span><span class="channel-tag">游庭皓的財經皓角</span>
     </div>
 
-    
+    <div id="pagination-top" class="pagination"></div>
+    <div id="videos-container">
+        
+        <article class="video-card">
+            <img src="https://i.ytimg.com/vi/hJDq76DDJvs/mqdefault.jpg" alt="The #1 Ranked Female Plays in an S Tier AoE2 Tournament" class="thumbnail">
+            <div class="content">
+                <h2><a href="summary.html?v=2025-12-14-hJDq76DDJvs">The #1 Ranked Female Plays in an S Tier AoE2 Tournament</a></h2>
+                <p class="meta">Hera - Age of Empires 2 &bull; 2025-12-14</p>
+                <p class="summary">本片分析了一場《世紀帝國II》的歷史性錦標賽，由首位參加S級賽事的女性選手Gabby對戰頂級高手TheTatoh。儘管開局處於劣勢，看似瀕臨戰敗，Gabby憑藉一次絕地反攻，扭轉戰局，取得了系列賽中的驚人首勝。</p>
+                <div class="links">
+                    <a href="summary.html?v=2025-12-14-hJDq76DDJvs">Full Summary</a>
+                    <a href="https://youtube.com/watch?v=hJDq76DDJvs" target="_blank">Watch Video</a>
+                </div>
+            </div>
+        </article>
         <article class="video-card">
             <img src="https://i.ytimg.com/vi/50ApPDZnY9I/mqdefault.jpg" alt="統一認真考慮選江少慶！為什麼明知很盤我還是覺得要選？江少慶在中職的成績真的很糟嗎？" class="thumbnail">
             <div class="content">
@@ -185,6 +235,30 @@
             </div>
         </article>
         <article class="video-card">
+            <img src="https://i.ytimg.com/vi/_M5RLKfvoq0/mqdefault.jpg" alt="$30 vs $30,000 TV" class="thumbnail">
+            <div class="content">
+                <h2><a href="summary.html?v=2025-12-13-_M5RLKfvoq0">$30 vs $30,000 TV</a></h2>
+                <p class="meta">Linus Tech Tips &bull; 2025-12-13</p>
+                <p class="summary">影片比較了四個價位（35美元、300美元、3000美元、30000美元）的電視，結論是300美元的電視是「高CP值甜蜜點」。OLED技術帶來了畫質的巨大飛躍，而最昂貴的電視則是追求極致亮度、尺寸和炫耀地位的選擇，但其邊際效益遞減。</p>
+                <div class="links">
+                    <a href="summary.html?v=2025-12-13-_M5RLKfvoq0">Full Summary</a>
+                    <a href="https://youtube.com/watch?v=_M5RLKfvoq0" target="_blank">Watch Video</a>
+                </div>
+            </div>
+        </article>
+        <article class="video-card">
+            <img src="https://i.ytimg.com/vi/EfQyfM0oQnk/mqdefault.jpg" alt="Our World Record Was Shattered - WAN Show December 12, 2025" class="thumbnail">
+            <div class="content">
+                <h2><a href="summary.html?v=2025-12-13-EfQyfM0oQnk">Our World Record Was Shattered - WAN Show December 12, 2025</a></h2>
+                <p class="meta">Linus Tech Tips &bull; 2025-12-13</p>
+                <p class="summary">Linus 和 Luke 討論了近期的科技大事件：NVIDIA 因使用 YouTube 影片訓練 AI 而面臨創作者的集體訴訟，但 LMG 不打算加入；澳洲立法禁止 16 歲以下青少年使用社群媒體，但他們認為此舉效果有限。節目最後，Linus 開心地分享了他兒子在學校創業市集大獲成功的故事。</p>
+                <div class="links">
+                    <a href="summary.html?v=2025-12-13-EfQyfM0oQnk">Full Summary</a>
+                    <a href="https://youtube.com/watch?v=EfQyfM0oQnk" target="_blank">Watch Video</a>
+                </div>
+            </div>
+        </article>
+        <article class="video-card">
             <img src="https://i.ytimg.com/vi/6mJkn3u1bas/mqdefault.jpg" alt="Observing & Evaluating Deep Agents Webinar with LangChain" class="thumbnail">
             <div class="content">
                 <h2><a href="summary.html?v=2025-12-12-6mJkn3u1bas">Observing & Evaluating Deep Agents Webinar with LangChain</a></h2>
@@ -205,6 +279,18 @@
                 <div class="links">
                     <a href="summary.html?v=2025-12-12-l9lBeMZZScc">Full Summary</a>
                     <a href="https://youtube.com/watch?v=l9lBeMZZScc" target="_blank">Watch Video</a>
+                </div>
+            </div>
+        </article>
+        <article class="video-card">
+            <img src="https://i.ytimg.com/vi/aimBRIjsGCo/mqdefault.jpg" alt="How I Appear Less Awkward" class="thumbnail">
+            <div class="content">
+                <h2><a href="summary.html?v=2025-12-12-aimBRIjsGCo">How I Appear Less Awkward</a></h2>
+                <p class="meta">Linus Tech Tips &bull; 2025-12-12</p>
+                <p class="summary">影片講述了一位曾經極度內向、不善言辭的人，如何透過刻意練習，從害怕與人交談，轉變為在鏡頭前揮灑自如的創作者。這個故事證明了只要投入足夠的練習，看似無法克服的弱點也能轉化為專業強項。</p>
+                <div class="links">
+                    <a href="summary.html?v=2025-12-12-aimBRIjsGCo">Full Summary</a>
+                    <a href="https://youtube.com/watch?v=aimBRIjsGCo" target="_blank">Watch Video</a>
                 </div>
             </div>
         </article>
@@ -245,6 +331,18 @@
             </div>
         </article>
         <article class="video-card">
+            <img src="https://i.ytimg.com/vi/44KP0vp2Wvg/mqdefault.jpg" alt="The Fastest Computer I've Ever Had" class="thumbnail">
+            <div class="content">
+                <h2><a href="summary.html?v=2025-12-11-44KP0vp2Wvg">The Fastest Computer I've Ever Had</a></h2>
+                <p class="meta">Linus Tech Tips &bull; 2025-12-11</p>
+                <p class="summary">這部影片展示了AMD Threadripper Pro 9995WX這顆擁有96核心的處理器無與倫比的強大性能。透過極致的超頻與水冷散熱，團隊將其功耗從預設的350瓦推升至驚人的1900瓦，雖然成功榨出了頂尖效能，但也證明了這類硬體是專為極端專業人士設計的，對一般消費者而言既昂貴又不切實際。</p>
+                <div class="links">
+                    <a href="summary.html?v=2025-12-11-44KP0vp2Wvg">Full Summary</a>
+                    <a href="https://youtube.com/watch?v=44KP0vp2Wvg" target="_blank">Watch Video</a>
+                </div>
+            </div>
+        </article>
+        <article class="video-card">
             <img src="https://i.ytimg.com/vi/2EBPg42ke2g/mqdefault.jpg" alt="Trace OpenRouter Calls to LangSmith — No Code Changes Needed" class="thumbnail">
             <div class="content">
                 <h2><a href="summary.html?v=2025-12-11-2EBPg42ke2g">Trace OpenRouter Calls to LangSmith — No Code Changes Needed</a></h2>
@@ -277,6 +375,18 @@
                 <div class="links">
                     <a href="summary.html?v=2025-12-11-5lGeoRtEF3M">Full Summary</a>
                     <a href="https://youtube.com/watch?v=5lGeoRtEF3M" target="_blank">Watch Video</a>
+                </div>
+            </div>
+        </article>
+        <article class="video-card">
+            <img src="https://i.ytimg.com/vi/bwnFoU-CpkU/mqdefault.jpg" alt="Giving away a $1000 pc" class="thumbnail">
+            <div class="content">
+                <h2><a href="summary.html?v=2025-12-10-bwnFoU-CpkU">Giving away a $1000 pc</a></h2>
+                <p class="meta">Linus Tech Tips &bull; 2025-12-10</p>
+                <p class="summary">Here's a summary of the transcript:</p>
+                <div class="links">
+                    <a href="summary.html?v=2025-12-10-bwnFoU-CpkU">Full Summary</a>
+                    <a href="https://youtube.com/watch?v=bwnFoU-CpkU" target="_blank">Watch Video</a>
                 </div>
             </div>
         </article>
@@ -1096,5 +1206,75 @@
                 </div>
             </div>
         </article>
+    </div>
+    <div id="pagination-bottom" class="pagination"></div>
+
+    <script>
+        const videosPerPage = 15;
+        let currentPage = 1;
+        const videoCards = Array.from(document.querySelectorAll('.video-card'));
+        const totalPages = Math.ceil(videoCards.length / videosPerPage);
+
+        function showPage(page) {
+            currentPage = page;
+            const start = (page - 1) * videosPerPage;
+            const end = start + videosPerPage;
+
+            videoCards.forEach((card, index) => {
+                card.style.display = (index >= start && index < end) ? 'flex' : 'none';
+            });
+
+            renderPagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderPagination() {
+            if (totalPages <= 1) return;
+
+            const paginationHTML = createPaginationHTML();
+            document.getElementById('pagination-top').innerHTML = paginationHTML;
+            document.getElementById('pagination-bottom').innerHTML = paginationHTML;
+        }
+
+        function createPaginationHTML() {
+            let html = '';
+
+            // Previous button
+            html += '<button onclick="showPage(' + (currentPage - 1) + ')" ' + (currentPage === 1 ? 'disabled' : '') + '>Prev</button>';
+
+            // Page numbers
+            const maxVisible = 7;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+            if (endPage - startPage < maxVisible - 1) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+
+            if (startPage > 1) {
+                html += '<button onclick="showPage(1)">1</button>';
+                if (startPage > 2) html += '<span class="page-info">...</span>';
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += '<button onclick="showPage(' + i + ')" class="' + (i === currentPage ? 'active' : '') + '">' + i + '</button>';
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += '<span class="page-info">...</span>';
+                html += '<button onclick="showPage(' + totalPages + ')">' + totalPages + '</button>';
+            }
+
+            // Next button
+            html += '<button onclick="showPage(' + (currentPage + 1) + ')" ' + (currentPage === totalPages ? 'disabled' : '') + '>Next</button>';
+
+            return html;
+        }
+
+        // Initialize pagination
+        if (videoCards.length > 0) {
+            showPage(1);
+        }
+    </script>
 </body>
 </html>
