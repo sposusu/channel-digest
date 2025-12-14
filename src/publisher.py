@@ -251,6 +251,42 @@ def generate_index_html(data: dict, output_path: str, channel_names: list = None
             border-color: #c00;
             cursor: default;
         }}
+        .pagination {{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin: 24px 0;
+            flex-wrap: wrap;
+        }}
+        .pagination button {{
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #333;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }}
+        .pagination button:hover:not(:disabled) {{
+            background: #f9f9f9;
+            border-color: #c00;
+            color: #c00;
+        }}
+        .pagination button.active {{
+            background: #c00;
+            color: white;
+            border-color: #c00;
+        }}
+        .pagination button:disabled {{
+            opacity: 0.5;
+            cursor: not-allowed;
+        }}
+        .pagination .page-info {{
+            color: #666;
+            font-size: 0.9em;
+        }}
         @media (max-width: 600px) {{
             .video-card {{
                 flex-direction: column;
@@ -271,7 +307,79 @@ def generate_index_html(data: dict, output_path: str, channel_names: list = None
         {''.join(f'<span class="channel-tag">{name}</span>' for name in channel_names) if channel_names else '<span class="channel-tag">No channels yet</span>'}
     </div>
 
-    {''.join(video_cards) if video_cards else '<p style="text-align:center">No videos yet. Run the digest to fetch summaries.</p>'}
+    <div id="pagination-top" class="pagination"></div>
+    <div id="videos-container">
+        {''.join(video_cards) if video_cards else '<p style="text-align:center">No videos yet. Run the digest to fetch summaries.</p>'}
+    </div>
+    <div id="pagination-bottom" class="pagination"></div>
+
+    <script>
+        const videosPerPage = 15;
+        let currentPage = 1;
+        const videoCards = Array.from(document.querySelectorAll('.video-card'));
+        const totalPages = Math.ceil(videoCards.length / videosPerPage);
+
+        function showPage(page) {{
+            currentPage = page;
+            const start = (page - 1) * videosPerPage;
+            const end = start + videosPerPage;
+
+            videoCards.forEach((card, index) => {{
+                card.style.display = (index >= start && index < end) ? 'flex' : 'none';
+            }});
+
+            renderPagination();
+            window.scrollTo({{ top: 0, behavior: 'smooth' }});
+        }}
+
+        function renderPagination() {{
+            if (totalPages <= 1) return;
+
+            const paginationHTML = createPaginationHTML();
+            document.getElementById('pagination-top').innerHTML = paginationHTML;
+            document.getElementById('pagination-bottom').innerHTML = paginationHTML;
+        }}
+
+        function createPaginationHTML() {{
+            let html = '';
+
+            // Previous button
+            html += '<button onclick="showPage(' + (currentPage - 1) + ')" ' + (currentPage === 1 ? 'disabled' : '') + '>Prev</button>';
+
+            // Page numbers
+            const maxVisible = 7;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+            if (endPage - startPage < maxVisible - 1) {{
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }}
+
+            if (startPage > 1) {{
+                html += '<button onclick="showPage(1)">1</button>';
+                if (startPage > 2) html += '<span class="page-info">...</span>';
+            }}
+
+            for (let i = startPage; i <= endPage; i++) {{
+                html += '<button onclick="showPage(' + i + ')" class="' + (i === currentPage ? 'active' : '') + '">' + i + '</button>';
+            }}
+
+            if (endPage < totalPages) {{
+                if (endPage < totalPages - 1) html += '<span class="page-info">...</span>';
+                html += '<button onclick="showPage(' + totalPages + ')">' + totalPages + '</button>';
+            }}
+
+            // Next button
+            html += '<button onclick="showPage(' + (currentPage + 1) + ')" ' + (currentPage === totalPages ? 'disabled' : '') + '>Next</button>';
+
+            return html;
+        }}
+
+        // Initialize pagination
+        if (videoCards.length > 0) {{
+            showPage(1);
+        }}
+    </script>
 </body>
 </html>
 """
